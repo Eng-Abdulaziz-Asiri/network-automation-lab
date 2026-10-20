@@ -5,6 +5,10 @@
 ![Ansible](https://img.shields.io/badge/Ansible-automation-black?logo=ansible)
 ![Python](https://img.shields.io/badge/Python-3-yellow?logo=python)
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Eng-Abdulaziz-Asiri/network-automation-lab?quickstart=1)
+
+> **No install needed:** click the button above, wait ~3 minutes, then run `make all` in the terminal.
+
 A reproducible enterprise network lab — **two branch sites connected through an ISP** — built entirely as code.
 One YAML file describes the whole network; **Ansible** renders and pushes the configs; a **Python health check** verifies it live.
 
