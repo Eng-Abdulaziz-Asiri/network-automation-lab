@@ -127,6 +127,18 @@ sleep 10 && make test   # back to HEALTHY
 
 ---
 
+## 🛠️ Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `permission denied ... docker.sock` | Add yourself to the groups, then restart the shell: `sudo usermod -aG docker,clab_admins $USER` |
+| **WSL:** `which docker` shows `/mnt/c/Program Files/Docker/...` | Docker Desktop is leaking into WSL. Disable *Settings → Resources → WSL Integration* for Ubuntu, or add `appendWindowsPath=false` under `[interop]` in `/etc/wsl.conf` |
+| **WSL:** Docker service won't start | Enable systemd: add `[boot]` / `systemd=true` to `/etc/wsl.conf`, then run `wsl --shutdown` from PowerShell |
+| A node lost its links after `docker stop` / `docker start` | Containerlab links are removed when a container stops. Rebuild with `make deploy` |
+| `make test` shows FAIL right after deploy | Protocols may still be converging. Wait ~20s and run `make test` again |
+
+---
+
 ##  Roadmap
 
 - [ ] CI pipeline with GitHub Actions (build + test on every push)
