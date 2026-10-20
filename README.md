@@ -136,6 +136,17 @@ sleep 10 && make test   # back to HEALTHY
 └── scripts/summary.py         # Live health check
 ```
 
+### Key files
+
+| File | Purpose |
+|---|---|
+| [`ansible/group_vars/all.yml`](ansible/group_vars/all.yml) | Source of Truth: every IP, ASN and neighbor |
+| [`ansible/templates/frr.conf.j2`](ansible/templates/frr.conf.j2) | Jinja2 template that renders each router's config |
+| [`ansible/deploy.yml`](ansible/deploy.yml) | Playbook: render configs and reload FRR |
+| [`scripts/summary.py`](scripts/summary.py) | Live health check (expected vs actual) |
+| [`topology.clab.yml`](topology.clab.yml) | Containerlab topology (nodes + links) |
+| [`Makefile`](Makefile) | One-command workflow |
+
 ---
 
 ## Troubleshooting
