@@ -1,18 +1,13 @@
-#  Multi-Site Network Automation Lab
+# Multi-Site Network Automation Lab
 
 ![Containerlab](https://img.shields.io/badge/Containerlab-0.81-blue)
 ![FRR](https://img.shields.io/badge/FRRouting-10.2.1-red)
 ![Ansible](https://img.shields.io/badge/Ansible-automation-black?logo=ansible)
 ![Python](https://img.shields.io/badge/Python-3-yellow?logo=python)
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Eng-Abdulaziz-Asiri/network-automation-lab?quickstart=1)
-
-> **No install needed:** click the button above, wait ~3 minutes, then run `make all` in the terminal.
-
 A reproducible enterprise network lab — **two branch sites connected through an ISP** — built entirely as code.
 One YAML file describes the whole network; **Ansible** renders and pushes the configs; a **Python health check** verifies it live.
-
-> Spin up 5 routers + 2 hosts, configure OSPF & BGP, and validate end-to-end connectivity with **one command**: `make all`
+Spin up 5 routers + 2 hosts, configure OSPF & BGP, and validate end-to-end connectivity with **one command**: `make all`.
 
 ---
 
@@ -54,7 +49,7 @@ graph LR
 
 ---
 
-##  Features
+## Features
 
 - **Infrastructure as Code** — topology, data, and configs all live in Git
 - **Single Source of Truth** — `ansible/group_vars/all.yml` defines every IP, ASN, and neighbor
@@ -65,20 +60,32 @@ graph LR
 
 ---
 
-##  Quick Start
+## Quick Start
 
-### Requirements
-- Linux or Windows with **WSL2 (Ubuntu)**
-- [Docker](https://docs.docker.com/engine/install/)
-- [Containerlab](https://containerlab.dev/install/)
-- Ansible, Python 3, make → `sudo apt install -y ansible make`
+Choose **one** way to run the lab:
 
-### Run
+### Option A — In your browser (no install)
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Eng-Abdulaziz-Asiri/network-automation-lab?quickstart=1)
+
+1. Click the button above and choose **Create codespace** (free GitHub account required)
+2. Wait ~3–5 minutes for the environment to build
+3. In the terminal, run:
+```bash
+make all
+```
+> When you're done, stop the codespace from [github.com/codespaces](https://github.com/codespaces) to save your free hours.
+
+### Option B — On your own machine
+
+**Requirements:** Linux or Windows with WSL2 (Ubuntu), [Docker](https://docs.docker.com/engine/install/), [Containerlab](https://containerlab.dev/install/), and `sudo apt install -y git ansible make`
+
 ```bash
 git clone https://github.com/Eng-Abdulaziz-Asiri/network-automation-lab.git
 cd network-automation-lab
 make all
 ```
+> Stuck? See [Troubleshooting](#troubleshooting).
 
 ### Commands
 | Command | What it does |
@@ -91,7 +98,7 @@ make all
 
 ---
 
-##  Health Check
+## Health Check
 
 `make test` shows every device with its role, ASN, and live OSPF/BGP status, then pings hostA → hostB:
 
@@ -104,7 +111,7 @@ End-to-end: hostA -> hostB (10.2.10.10)  PASS
 Overall: HEALTHY
 ```
 
-###  Try breaking it
+### Try breaking it
 Simulate a link failure and watch the check catch it:
 ```bash
 docker exec clab-netauto-r5 ip link set eth1 down
@@ -131,7 +138,9 @@ sleep 10 && make test   # back to HEALTHY
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
+
+For **Option B** (local setup):
 
 | Problem | Fix |
 |---|---|
@@ -143,7 +152,7 @@ sleep 10 && make test   # back to HEALTHY
 
 ---
 
-##  Roadmap
+## Roadmap
 
 - [ ] CI pipeline with GitHub Actions (build + test on every push)
 - [ ] Config drift detection
@@ -152,7 +161,7 @@ sleep 10 && make test   # back to HEALTHY
 
 ---
 
-##  Author
+## Author
 
 **Abdulaziz Asiri** — Computer & Network Engineering student
 [GitHub](https://github.com/Eng-Abdulaziz-Asiri)
