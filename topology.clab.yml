@@ -1,0 +1,38 @@
+name: netauto
+
+topology:
+  groups:
+    routers:
+      kind: linux
+      image: quay.io/frrouting/frr:10.2.1
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+
+  nodes:
+    r1: { group: routers, binds: [configs/r1:/etc/frr] }
+    r2: { group: routers, binds: [configs/r2:/etc/frr] }
+    r3: { group: routers, binds: [configs/r3:/etc/frr] }
+    r4: { group: routers, binds: [configs/r4:/etc/frr] }
+    r5: { group: routers, binds: [configs/r5:/etc/frr] }
+
+    hostA:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool
+      exec:
+        - ip addr add 10.1.10.10/24 dev eth1
+        - ip route add 10.0.0.0/8 via 10.1.10.1
+
+    hostB:
+      kind: linux
+      image: ghcr.io/hellt/network-multitool
+      exec:
+        - ip addr add 10.2.10.10/24 dev eth1
+        - ip route add 10.0.0.0/8 via 10.2.10.1
+
+  links:
+    - endpoints: ["r1:eth1", "r2:eth1"]      # Site A
+    - endpoints: ["r1:eth2", "r5:eth1"]      # Site A <-> ISP
+    - endpoints: ["r5:eth2", "r3:eth2"]      # ISP <-> Site B
+    - endpoints: ["r3:eth1", "r4:eth1"]      # Site B
+    - endpoints: ["r2:eth2", "hostA:eth1"]
+    - endpoints: ["r4:eth2", "hostB:eth1"]

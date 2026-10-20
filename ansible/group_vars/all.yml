@@ -1,0 +1,50 @@
+# ===== Source of Truth: كل الشبكة في هذا الملف =====
+network:
+  r1:   # Site A edge
+    loopback: 10.1.255.1
+    interfaces:
+      - { name: eth1, ip: 10.1.0.1/30, ospf: true, p2p: true }
+      - { name: eth2, ip: 100.64.1.2/30 }
+    ospf: { area: 0, redistribute_bgp: true }
+    bgp:
+      asn: 65001
+      aggregate: 10.1.0.0/16
+      neighbors:
+        - { ip: 100.64.1.1, remote_as: 65000, desc: ISP }
+
+  r2:   # Site A access
+    loopback: 10.1.255.2
+    interfaces:
+      - { name: eth1, ip: 10.1.0.2/30, ospf: true, p2p: true }
+      - { name: eth2, ip: 10.1.10.1/24, ospf: true }
+    ospf: { area: 0, passive: [eth2] }
+
+  r3:   # Site B edge
+    loopback: 10.2.255.3
+    interfaces:
+      - { name: eth1, ip: 10.2.0.1/30, ospf: true, p2p: true }
+      - { name: eth2, ip: 100.64.2.2/30 }
+    ospf: { area: 0, redistribute_bgp: true }
+    bgp:
+      asn: 65002
+      aggregate: 10.2.0.0/16
+      neighbors:
+        - { ip: 100.64.2.1, remote_as: 65000, desc: ISP }
+
+  r4:   # Site B access
+    loopback: 10.2.255.4
+    interfaces:
+      - { name: eth1, ip: 10.2.0.2/30, ospf: true, p2p: true }
+      - { name: eth2, ip: 10.2.10.1/24, ospf: true }
+    ospf: { area: 0, passive: [eth2] }
+
+  r5:   # ISP
+    loopback: 100.64.255.5
+    interfaces:
+      - { name: eth1, ip: 100.64.1.1/30 }
+      - { name: eth2, ip: 100.64.2.1/30 }
+    bgp:
+      asn: 65000
+      neighbors:
+        - { ip: 100.64.1.2, remote_as: 65001, desc: SiteA }
+        - { ip: 100.64.2.2, remote_as: 65002, desc: SiteB }

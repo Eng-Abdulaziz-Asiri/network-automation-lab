@@ -1,0 +1,7 @@
+clab-*/
+*.bak
+__pycache__/
+configs/*/*
+!configs/*/daemons
+!configs/*/frr.conf
+!configs/*/vtysh.conf

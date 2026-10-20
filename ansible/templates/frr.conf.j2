@@ -1,0 +1,52 @@
+{% set d = network[inventory_hostname] %}
+frr defaults traditional
+hostname {{ inventory_hostname }}
+service integrated-vtysh-config
+!
+interface lo
+ ip address {{ d.loopback }}/32
+{% if d.ospf is defined %}
+ ip ospf area {{ d.ospf.area }}
+{% endif %}
+!
+{% for i in d.interfaces %}
+interface {{ i.name }}
+ ip address {{ i.ip }}
+{% if i.ospf | default(false) %}
+ ip ospf area {{ d.ospf.area }}
+{% endif %}
+{% if i.p2p | default(false) %}
+ ip ospf network point-to-point
+{% endif %}
+!
+{% endfor %}
+{% if d.ospf is defined %}
+router ospf
+ ospf router-id {{ d.loopback }}
+{% for p in d.ospf.passive | default([]) %}
+ passive-interface {{ p }}
+{% endfor %}
+{% if d.ospf.redistribute_bgp | default(false) %}
+ redistribute bgp
+{% endif %}
+!
+{% endif %}
+{% if d.bgp is defined %}
+{% if d.bgp.aggregate is defined %}
+ip route {{ d.bgp.aggregate }} blackhole
+!
+{% endif %}
+router bgp {{ d.bgp.asn }}
+ bgp router-id {{ d.loopback }}
+ no bgp ebgp-requires-policy
+{% for n in d.bgp.neighbors %}
+ neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+ neighbor {{ n.ip }} description {{ n.desc }}
+{% endfor %}
+{% if d.bgp.aggregate is defined %}
+ address-family ipv4 unicast
+  network {{ d.bgp.aggregate }}
+ exit-address-family
+{% endif %}
+!
+{% endif %}

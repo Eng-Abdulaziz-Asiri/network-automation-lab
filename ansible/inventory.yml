@@ -1,0 +1,12 @@
+all:
+  vars:
+    ansible_connection: local
+    ansible_python_interpreter: /usr/bin/python3
+  children:
+    routers:
+      hosts:
+        r1:
+        r2:
+        r3:
+        r4:
+        r5:

@@ -1,0 +1,17 @@
+- name: Configure FRR routers from Source of Truth
+  hosts: routers
+  gather_facts: false
+
+  tasks:
+    - name: Render frr.conf from template
+      ansible.builtin.template:
+        src: templates/frr.conf.j2
+        dest: "{{ playbook_dir }}/../configs/{{ inventory_hostname }}/frr.conf"
+        mode: "0644"
+      notify: Reload FRR
+
+  handlers:
+    - name: Reload FRR
+      ansible.builtin.shell: >
+        docker exec clab-netauto-{{ inventory_hostname }} sh -c
+        '/usr/lib/frr/frr-reload.py --reload /etc/frr/frr.conf || vtysh -b'
