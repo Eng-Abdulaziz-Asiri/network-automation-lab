@@ -103,10 +103,15 @@ make all
 `make test` shows every device with its role, ASN, and live OSPF/BGP status, then pings hostA → hostB:
 
 ```
-Router Role    Loopback       ASN    Ifaces OSPF   BGP    Status
-r1     Edge    10.1.255.1     65001  2      1/1    1/1    PASS
-r2     Access  10.1.255.2     -      2      1/1    0/0    PASS
-...
+Lab: netauto  |  Nodes: 7 (5 routers, 2 hosts)  |  Links: 6
+
+Router Role    Loopback       ASN    Ifaces OSPF   BGP    Routes  Status
+r1     Edge    10.1.255.1     65001  2      1/1    1/1    12      PASS
+r2     Access  10.1.255.2     -      2      1/1    0/0    10      PASS
+r3     Edge    10.2.255.3     65002  2      1/1    1/1    12      PASS
+r4     Access  10.2.255.4     -      2      1/1    0/0    10      PASS
+r5     ISP     100.64.255.5   65000  2      0/0    2/2    10      PASS
+
 End-to-end: hostA -> hostB (10.2.10.10)  PASS
 Overall: HEALTHY
 ```

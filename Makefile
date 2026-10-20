@@ -8,7 +8,7 @@ deploy:       ## Start routers and links
 > containerlab deploy -t $(LAB) --reconfigure
 
 configure:    ## Push configs with Ansible
-> cd ansible && ansible-playbook deploy.yml
+> cd ansible && ansible-playbook -i inventory.yml deploy.yml
 
 wait:         ## Let OSPF/BGP converge
 > @echo "Waiting 30s for OSPF/BGP to converge..." && sleep 30

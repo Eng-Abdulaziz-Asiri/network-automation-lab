@@ -2,5 +2,5 @@
   "name": "network-automation-lab",
   "image": "ghcr.io/srl-labs/containerlab/devcontainer-dind-slim:0.68.0",
   "hostRequirements": { "cpus": 2, "memory": "8gb", "storage": "32gb" },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ansible make"
+  "postCreateCommand": "sudo apt-get update || true; sudo apt-get install -y ansible && python3 -m pip install pyyaml"
 }
