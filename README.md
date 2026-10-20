@@ -1,5 +1,6 @@
 # Multi-Site Network Automation Lab
 
+[![Lab CI](https://github.com/Eng-Abdulaziz-Asiri/network-automation-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Eng-Abdulaziz-Asiri/network-automation-lab/actions/workflows/ci.yml)
 ![Containerlab](https://img.shields.io/badge/Containerlab-0.81-blue)
 ![FRR](https://img.shields.io/badge/FRRouting-10.2.1-red)
 ![Ansible](https://img.shields.io/badge/Ansible-automation-black?logo=ansible)
@@ -170,7 +171,7 @@ For **Option B** (local setup):
 
 ## Roadmap
 
-- [ ] CI pipeline with GitHub Actions (build + test on every push)
+- [x] CI pipeline with GitHub Actions (build + test on every push)
 - [ ] Config drift detection
 - [ ] Automated config backups
 - [ ] BFD for faster failure detection
