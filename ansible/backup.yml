@@ -1,0 +1,31 @@
+- name: Backup running configs from all routers
+  hosts: routers
+  gather_facts: false
+
+  vars:
+    backup_dir: "{{ playbook_dir }}/../backups"
+
+  tasks:
+    - name: Pick one timestamp for this backup run
+      ansible.builtin.set_fact:
+        timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d_%H%M%S') }}"
+      run_once: true
+
+    - name: Get running config from the router
+      ansible.builtin.command: >
+        docker exec clab-netauto-{{ inventory_hostname }}
+        vtysh -c "show running-config"
+      register: running
+      changed_when: false
+
+    - name: Make sure the backup folder exists
+      ansible.builtin.file:
+        path: "{{ backup_dir }}/{{ inventory_hostname }}"
+        state: directory
+        mode: "0755"
+
+    - name: Save the config to a file
+      ansible.builtin.copy:
+        content: "{{ running.stdout }}\n"
+        dest: "{{ backup_dir }}/{{ inventory_hostname }}/{{ timestamp }}.conf"
+        mode: "0644"

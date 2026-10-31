@@ -1,6 +1,6 @@
 .RECIPEPREFIX = >
 LAB = topology.clab.yml
-.PHONY: all deploy configure wait test destroy
+.PHONY: all deploy configure wait test backup destroy
 
 all: deploy configure wait test   ## Build + configure + verify everything
 
@@ -18,3 +18,6 @@ test:         ## Run health summary
 
 destroy:      ## Tear down the lab
 > containerlab destroy -t $(LAB) --cleanup
+
+backup:       ## Save running configs to backups/
+> cd ansible && ansible-playbook -i inventory.yml backup.yml

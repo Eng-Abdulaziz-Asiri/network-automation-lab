@@ -5,3 +5,4 @@ configs/*/*
 !configs/*/daemons
 !configs/*/frr.conf
 !configs/*/vtysh.conf
+backups/

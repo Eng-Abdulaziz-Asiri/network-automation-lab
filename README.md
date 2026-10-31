@@ -58,6 +58,7 @@ graph LR
 - **Idempotent automation** — Ansible only reloads routers whose config actually changed
 - **Live health check** — compares *expected* (from the data file) vs *actual* (from the routers) and prints PASS/FAIL
 - **One-command workflow** — `make all` builds, configures, waits, and tests
+- **Automated config backups** — `make backup` saves every router's running config to `backups/` with a timestamp
 
 ---
 
@@ -95,6 +96,7 @@ make all
 | `make deploy` | Start routers and links |
 | `make configure` | Push configs with Ansible |
 | `make test` | Run the health summary |
+| `make backup` | Save running configs to `backups/` |
 | `make destroy` | Tear down the lab |
 
 ---
@@ -137,8 +139,10 @@ sleep 10 && make test   # back to HEALTHY
 │   ├── group_vars/all.yml     # Source of Truth
 │   ├── templates/frr.conf.j2  # Config template
 │   ├── deploy.yml             # Playbook
+│   ├── backup.yml             # Backup playbook
 │   └── inventory.yml
 ├── configs/r1..r5/            # Rendered router configs (mounted into containers)
+├── backups/                   # Timestamped config backups (git-ignored)
 └── scripts/summary.py         # Live health check
 ```
 
@@ -149,6 +153,7 @@ sleep 10 && make test   # back to HEALTHY
 | [`ansible/group_vars/all.yml`](ansible/group_vars/all.yml) | Source of Truth: every IP, ASN and neighbor |
 | [`ansible/templates/frr.conf.j2`](ansible/templates/frr.conf.j2) | Jinja2 template that renders each router's config |
 | [`ansible/deploy.yml`](ansible/deploy.yml) | Playbook: render configs and reload FRR |
+| [`ansible/backup.yml`](ansible/backup.yml) | Playbook: save each router's running config |
 | [`scripts/summary.py`](scripts/summary.py) | Live health check (expected vs actual) |
 | [`topology.clab.yml`](topology.clab.yml) | Containerlab topology (nodes + links) |
 | [`Makefile`](Makefile) | One-command workflow |
@@ -173,7 +178,7 @@ For **Option B** (local setup):
 
 - [x] CI pipeline with GitHub Actions (build + test on every push)
 - [ ] Config drift detection
-- [ ] Automated config backups
+- [x] Automated config backups
 - [ ] BFD for faster failure detection
 
 ---
