@@ -59,6 +59,7 @@ graph LR
 - **Live health check** — compares *expected* (from the data file) vs *actual* (from the routers) and prints PASS/FAIL
 - **One-command workflow** — `make all` builds, configures, waits, and tests
 - **Automated config backups** — `make backup` saves every router's running config to `backups/` with a timestamp
+- **Config drift detection** — `make drift` compares each router's running config with the Source of Truth and shows any manual change
 
 ---
 
@@ -97,6 +98,7 @@ make all
 | `make configure` | Push configs with Ansible |
 | `make test` | Run the health summary |
 | `make backup` | Save running configs to `backups/` |
+| `make drift` | Check routers for config drift |
 | `make destroy` | Tear down the lab |
 
 ---
@@ -143,7 +145,8 @@ sleep 10 && make test   # back to HEALTHY
 │   └── inventory.yml
 ├── configs/r1..r5/            # Rendered router configs (mounted into containers)
 ├── backups/                   # Timestamped config backups (git-ignored)
-└── scripts/summary.py         # Live health check
+├── scripts/summary.py         # Live health check
+└── scripts/drift.py           # Config drift detection
 ```
 
 ### Key files
@@ -155,6 +158,7 @@ sleep 10 && make test   # back to HEALTHY
 | [`ansible/deploy.yml`](ansible/deploy.yml) | Playbook: render configs and reload FRR |
 | [`ansible/backup.yml`](ansible/backup.yml) | Playbook: save each router's running config |
 | [`scripts/summary.py`](scripts/summary.py) | Live health check (expected vs actual) |
+| [`scripts/drift.py`](scripts/drift.py) | Drift check: intended config vs running config |
 | [`topology.clab.yml`](topology.clab.yml) | Containerlab topology (nodes + links) |
 | [`Makefile`](Makefile) | One-command workflow |
 
@@ -177,7 +181,7 @@ For **Option B** (local setup):
 ## Roadmap
 
 - [x] CI pipeline with GitHub Actions (build + test on every push)
-- [ ] Config drift detection
+- [x] Config drift detection
 - [x] Automated config backups
 - [ ] BFD for faster failure detection
 

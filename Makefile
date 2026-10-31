@@ -1,6 +1,6 @@
 .RECIPEPREFIX = >
 LAB = topology.clab.yml
-.PHONY: all deploy configure wait test backup destroy
+.PHONY: all deploy configure wait test backup drift destroy
 
 all: deploy configure wait test   ## Build + configure + verify everything
 
@@ -21,3 +21,6 @@ destroy:      ## Tear down the lab
 
 backup:       ## Save running configs to backups/
 > cd ansible && ansible-playbook -i inventory.yml backup.yml
+
+drift:        ## Compare running configs with the Source of Truth
+> python3 scripts/drift.py

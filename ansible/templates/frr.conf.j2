@@ -18,14 +18,14 @@ interface {{ i.name }}
 {% if i.p2p | default(false) %}
  ip ospf network point-to-point
 {% endif %}
+{% if d.ospf is defined and i.name in d.ospf.passive | default([]) %}
+ ip ospf passive
+{% endif %}
 !
 {% endfor %}
 {% if d.ospf is defined %}
 router ospf
  ospf router-id {{ d.loopback }}
-{% for p in d.ospf.passive | default([]) %}
- passive-interface {{ p }}
-{% endfor %}
 {% if d.ospf.redistribute_bgp | default(false) %}
  redistribute bgp
 {% endif %}
