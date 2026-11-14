@@ -23,13 +23,24 @@ jobs:
           containerlab version
           ansible --version
 
+      - name: Rendered configs match the Source of Truth
+        # If someone edits all.yml or the template but forgets to commit
+        # the rendered configs/, Ansible would report "changed" here.
+        run: |
+          cd ansible
+          ansible-playbook -i inventory.yml deploy.yml --check --diff | tee /tmp/check.log
+          if grep -qE 'changed=[1-9]' /tmp/check.log; then
+            echo "::error::configs/ is out of date. Run 'make configure' and commit the result."
+            exit 1
+          fi
+
       - name: Deploy lab (5 routers + 2 hosts)
         run: sudo containerlab deploy -t topology.clab.yml --reconfigure
 
       - name: Configure routers with Ansible
         run: make configure
 
-      - name: Health check (retry while OSPF/BGP converge)
+      - name: Health check — OSPF, BGP, BFD, end-to-end (retry while converging)
         run: |
           for i in 1 2 3 4 5 6; do
             sleep 15
@@ -38,13 +49,36 @@ jobs:
           done
           exit 1
 
+      - name: Config drift check (running config == Source of Truth)
+        run: make drift
+
+      - name: BFD failover test (silent link failure must be detected in < 2 s)
+        run: make failover
+
+      - name: Health check after failover (back to HEALTHY)
+        run: |
+          for i in 1 2 3 4; do
+            if python3 scripts/summary.py; then exit 0; fi
+            sleep 10
+          done
+          exit 1
+
+      - name: Backup running configs
+        run: make backup
+
+      - name: Upload config backups
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-backups
+          path: backups/
+
       - name: Debug info on failure
         if: failure()
         run: |
           sudo containerlab inspect -t topology.clab.yml || true
           for r in r1 r2 r3 r4 r5; do
             echo "===== $r ====="
-            docker exec clab-netauto-$r vtysh -c "show ip route" || true
+            docker exec clab-netauto-$r vtysh -c "show ip route" -c "show bfd peers brief" || true
           done
 
       - name: Destroy lab

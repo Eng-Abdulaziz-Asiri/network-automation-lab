@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lab summary: every device in the lab with live OSPF/BGP status."""
+"""Lab summary: every device in the lab with live OSPF/BGP/BFD status."""
 import json
 import subprocess
 import sys
@@ -49,7 +49,7 @@ def main():
 
     print(f"\n{B}Lab: {lab}{X}  |  Nodes: {len(nodes)} "
           f"({len(network)} routers, {len(hosts)} hosts)  |  Links: {len(links)}\n")
-    head = f"{'Router':<7}{'Role':<8}{'Loopback':<15}{'ASN':<7}{'Ifaces':<7}{'OSPF':<7}{'BGP':<7}{'Routes':<8}Status"
+    head = f"{'Router':<7}{'Role':<8}{'Loopback':<15}{'ASN':<7}{'Ifaces':<7}{'OSPF':<7}{'BGP':<7}{'BFD':<7}{'Routes':<8}Status"
     print(B + head + X)
     print("-" * len(head))
 
@@ -58,7 +58,7 @@ def main():
         asn = str(d.get("bgp", {}).get("asn", "-"))
         base = f"{name:<7}{role(d):<8}{d['loopback']:<15}{asn:<7}{len(d['interfaces']):<7}"
         if not running(lab, name):
-            print(base + f"{'-':<7}{'-':<7}{'-':<8}" + mark(False, bad="DOWN"))
+            print(base + f"{'-':<7}{'-':<7}{'-':<7}{'-':<8}" + mark(False, bad="DOWN"))
             all_ok = False
             continue
 
@@ -66,6 +66,8 @@ def main():
         passive = d.get("ospf", {}).get("passive", [])
         exp_ospf = sum(1 for i in d["interfaces"] if i.get("ospf") and i["name"] not in passive)
         exp_bgp = len(d.get("bgp", {}).get("neighbors", []))
+        exp_bfd = (sum(1 for i in d["interfaces"] if i.get("bfd"))
+                   + sum(1 for n in d.get("bgp", {}).get("neighbors", []) if n.get("bfd")))
 
         # Live (from the router)
         ospf = vtysh(lab, name, "show ip ospf neighbor json").get("neighbors", {})
@@ -73,11 +75,14 @@ def main():
                       if str(n.get("nbrState", n.get("state", ""))).startswith("Full"))
         peers = vtysh(lab, name, "show bgp summary json").get("ipv4Unicast", {}).get("peers", {})
         bgp_up = sum(1 for p in peers.values() if p.get("state") == "Established")
+        bfd = vtysh(lab, name, "show bfd peers json") or []
+        bfd_up = sum(1 for p in bfd if p.get("status") == "up")
         routes = len(vtysh(lab, name, "show ip route json"))
 
-        ok = ospf_up == exp_ospf and bgp_up == exp_bgp
+        ok = ospf_up == exp_ospf and bgp_up == exp_bgp and bfd_up == exp_bfd
         all_ok &= ok
-        print(base + f"{f'{ospf_up}/{exp_ospf}':<7}{f'{bgp_up}/{exp_bgp}':<7}{routes:<8}" + mark(ok))
+        print(base + f"{f'{ospf_up}/{exp_ospf}':<7}{f'{bgp_up}/{exp_bgp}':<7}"
+              f"{f'{bfd_up}/{exp_bfd}':<7}{routes:<8}" + mark(ok))
 
     print(f"\n{B}Hosts{X}")
     ips = {}

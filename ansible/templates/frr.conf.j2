@@ -18,6 +18,10 @@ interface {{ i.name }}
 {% if i.p2p | default(false) %}
  ip ospf network point-to-point
 {% endif %}
+{% if i.bfd | default(false) %}
+ ip ospf bfd
+ ip ospf bfd profile {{ bfd.profile }}
+{% endif %}
 {% if d.ospf is defined and i.name in d.ospf.passive | default([]) %}
  ip ospf passive
 {% endif %}
@@ -42,11 +46,29 @@ router bgp {{ d.bgp.asn }}
 {% for n in d.bgp.neighbors %}
  neighbor {{ n.ip }} remote-as {{ n.remote_as }}
  neighbor {{ n.ip }} description {{ n.desc }}
+{% if n.bfd | default(false) %}
+ neighbor {{ n.ip }} bfd
+ neighbor {{ n.ip }} bfd profile {{ bfd.profile }}
+{% endif %}
 {% endfor %}
 {% if d.bgp.aggregate is defined %}
  address-family ipv4 unicast
   network {{ d.bgp.aggregate }}
  exit-address-family
 {% endif %}
+!
+{% endif %}
+{% if bfd is defined %}
+bfd
+ profile {{ bfd.profile }}
+{# FRR hides default values (300 ms, x3) in running-config, so only write non-defaults #}
+{% if bfd.interval_ms != 300 %}
+  transmit-interval {{ bfd.interval_ms }}
+  receive-interval {{ bfd.interval_ms }}
+{% endif %}
+{% if bfd.multiplier != 3 %}
+  detect-multiplier {{ bfd.multiplier }}
+{% endif %}
+ exit
 !
 {% endif %}

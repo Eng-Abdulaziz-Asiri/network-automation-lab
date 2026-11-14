@@ -1,6 +1,6 @@
 .RECIPEPREFIX = >
 LAB = topology.clab.yml
-.PHONY: all deploy configure wait test backup drift destroy
+.PHONY: all deploy configure wait test backup drift failover destroy
 
 all: deploy configure wait test   ## Build + configure + verify everything
 
@@ -24,3 +24,6 @@ backup:       ## Save running configs to backups/
 
 drift:        ## Compare running configs with the Source of Truth
 > python3 scripts/drift.py
+
+failover:     ## Silent link failure: measure how fast BFD detects it
+> python3 scripts/failover.py
