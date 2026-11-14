@@ -110,19 +110,7 @@ make all
 
 `make test` shows every device with its role, ASN, and live OSPF/BGP/BFD status, then pings hostA → hostB:
 
-```
-Lab: netauto  |  Nodes: 7 (5 routers, 2 hosts)  |  Links: 6
-
-Router Role    Loopback       ASN    Ifaces OSPF   BGP    BFD    Routes  Status
-r1     Edge    10.1.255.1     65001  2      1/1    1/1    2/2    12      PASS
-r2     Access  10.1.255.2     -      2      1/1    0/0    1/1    10      PASS
-r3     Edge    10.2.255.3     65002  2      1/1    1/1    2/2    12      PASS
-r4     Access  10.2.255.4     -      2      1/1    0/0    1/1    10      PASS
-r5     ISP     100.64.255.5   65000  2      0/0    2/2    2/2    10      PASS
-
-End-to-end: hostA -> hostB (10.2.10.10)  PASS
-Overall: HEALTHY
-```
+![make test — every router PASS, lab HEALTHY](docs/images/health.png)
 
 ### Try breaking it
 Simulate a link failure and watch the check catch it:
@@ -132,6 +120,17 @@ make test        # r1 / r5 -> FAIL, end-to-end -> FAIL
 docker exec clab-netauto-r5 ip link set eth1 up
 sleep 10 && make test   # back to HEALTHY
 ```
+
+---
+
+## Config Drift Detection
+
+If someone changes a router by hand and never updates the Source of Truth, the live network and Git no longer agree.
+`make drift` compares every router's running config with `configs/<router>/frr.conf` and shows exactly which lines are missing or extra:
+
+![make drift — r1 drifted after a manual change](docs/images/drift.png)
+
+> Here BFD was removed from r1 by hand (`no ip ospf bfd`) — drift detection pinpoints the two missing lines.
 
 ---
 
@@ -161,22 +160,9 @@ neighbors:
 The test drops every packet on the ISP side of the r1 ↔ r5 link (the link stays **UP**) and times how long
 r1 takes to notice, then repairs the link and waits for BGP to come back:
 
-```
-BFD failover test  (r1 eth2 <-> r5 eth1, BGP peer 100.64.1.1)
+![make failover — silent failure detected in 0.76 s](docs/images/failover.png)
 
-  Breaking the link silently: dropping all packets on r5 eth1 ...
-  Repairing the link, waiting for BGP to come back ...
-
-  r1 interface eth2 during failure: UP  (silent failure)
-  BFD timers:                    200 ms x 3
-  Detected with BFD in:          0.62 s
-  Without BFD (BGP hold timer):  180 s
-  Recovered in:                  1.10 s
-
-Result: PASS
-```
-
-> **~290× faster** failure detection. The same test runs in CI on every push and fails if detection takes more than 2 s.
+> **180 s → 0.76 s.** The same test runs in CI on every push and fails if detection takes more than 2 s.
 
 ---
 
@@ -208,7 +194,8 @@ Every push to `main` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 ├── backups/                   # Timestamped config backups (git-ignored)
 ├── scripts/summary.py         # Live health check
 ├── scripts/drift.py           # Config drift detection
-└── scripts/failover.py        # BFD silent-failure test
+├── scripts/failover.py        # BFD silent-failure test
+└── docs/images/               # Screenshots used in this README
 ```
 
 ### Key files
